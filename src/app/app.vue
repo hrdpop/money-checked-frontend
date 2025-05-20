@@ -8,7 +8,9 @@
   <div class="app-container">
     <Header />
     <div class="main-content">
-      <Sidebar :routes="routes"/>
+      <nav class="sidebar">
+        <Sidebar :routes="routes"/>
+      </nav>
       <main class="content">
         <RouterView />
       </main>
@@ -17,6 +19,12 @@
 </template>
 
 <style scoped>
+.sidebar {
+  width: 200px;
+  background-color: #34495e;
+  color: white;
+  padding: 20px 0;
+}
 
 
 .app-container {

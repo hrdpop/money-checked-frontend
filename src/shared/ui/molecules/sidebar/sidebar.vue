@@ -3,47 +3,55 @@ import { defineProps } from 'vue'
 import type { RouteRecordRaw } from 'vue-router'
 
 interface Props {
-  routes: RouteRecordRaw[]
+  routes: readonly RouteRecordRaw[]
 }
 
 defineProps<Props>()
 </script>
 
 <template>
-  <nav class="sidebar">
-    <ul>
-      <li v-for="route in routes" :key="route.name">
-        <RouterLink :to="route.path">{{ route.name }}</RouterLink>
-      </li>
-    </ul>
-  </nav>
+  <ul class="sidebar__list">
+    <li v-for="route in routes" :key="route.name" class="sidebar__item">
+      <RouterLink
+        v-if="!route.children"
+        :to="route.path"
+        class="sidebar__link"
+      >
+        {{ route.name }}
+      </RouterLink>
+      <div v-else>
+        <p class="sidebar__link"> {{route.name}} </p>
+        <Sidebar
+          :routes="route.children"
+          class="sidebar__nested"
+        />
+      </div>
+    </li>
+  </ul>
 </template>
 
 <style scoped>
-.sidebar {
-  width: 200px;
-  background-color: #34495e;
-  color: white;
-  padding: 20px 0;
-}
-
-.sidebar ul {
+.sidebar__list {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-.sidebar li {
+.sidebar__item {
   padding: 10px 20px;
 }
 
-.sidebar a {
+.sidebar__link {
   color: white;
   text-decoration: none;
   display: block;
 }
 
-.sidebar a:hover {
+.sidebar__link:hover {
   color: #42b983;
+}
+
+.sidebar__nested {
+  margin-left: 10px; /* Отступ для вложенных меню */
 }
 </style>
