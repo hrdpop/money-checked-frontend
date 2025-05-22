@@ -20,10 +20,10 @@
 
 <style scoped>
 .sidebar {
-  width: 200px;
+  min-width: 200px;
   background-color: #34495e;
   color: white;
-  padding: 20px 0;
+  padding: 16px;
 }
 
 
