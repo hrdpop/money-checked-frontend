@@ -1,7 +1,7 @@
 <script setup lang="ts">
   import { RouterView } from 'vue-router'
   import { Header, Sidebar } from '@shared/ui'
-  import { routes } from './router/routes.ts'
+  import { routes } from './router/routes'
 </script>
 
 <template>
@@ -20,7 +20,8 @@
 
 <style scoped>
 .sidebar {
-  min-width: 200px;
+  min-width: 300px;
+  max-width: 300px;
   background-color: #34495e;
   color: white;
   padding: 16px;

@@ -115,6 +115,7 @@ const toggleRoute = (routeName: string | symbol | undefined, event?: Event) => {
 
 .sidebar__item {
   padding: 4px 0;
+  position: relative;
 }
 
 .sidebar__link {
@@ -123,6 +124,11 @@ const toggleRoute = (routeName: string | symbol | undefined, event?: Event) => {
   display: inline-block;
   vertical-align: middle;
   margin-left: 8px;
+
+  width: 100%;
+  overflow: hidden; 
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .sidebar__link:hover {
@@ -142,6 +148,7 @@ const toggleRoute = (routeName: string | symbol | undefined, event?: Event) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 1rem;
   padding: 4px 0;
 }
 
