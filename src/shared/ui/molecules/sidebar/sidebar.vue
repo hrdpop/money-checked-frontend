@@ -1,44 +1,101 @@
 <script setup lang="ts">
-import { defineProps, ref } from 'vue'
+import { defineProps, ref, watch, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
 
 interface Props {
   routes: readonly RouteRecordRaw[]
 }
 
-defineProps<Props>()
-
+const props = defineProps<Props>()
+const route = useRoute()
 const expandedRoutes = ref<Record<string | symbol, boolean>>({})
 
-const toggleRoute = (routeName: string | symbol | undefined) => {
-  if (!routeName) {
-    return;
+// Нормализация путей для сравнения
+const normalizePath = (path: string) => {
+  return path.replace(/\/+$/, '') || '/'
+}
+
+// Проверка, содержит ли маршрут или его дети текущий путь
+const containsCurrentRoute = (routeItem: RouteRecordRaw, currentPath: string): boolean => {
+  const normalizedCurrent = normalizePath(currentPath)
+  const normalizedRoutePath = normalizePath(routeItem.path)
+
+  if (normalizedRoutePath === normalizedCurrent) return true
+
+  if (routeItem.children) {
+    return routeItem.children.some(child => {
+      const childPath = normalizedRoutePath +
+        (child.path.startsWith('/') ? child.path : '/' + child.path)
+      return normalizePath(childPath) === normalizedCurrent ||
+        containsCurrentRoute(child, normalizedCurrent)
+    })
   }
+
+  return false
+}
+
+// Раскрытие всех родительских маршрутов, содержащих текущий
+const expandActiveRoutes = (routes: readonly RouteRecordRaw[], currentPath: string) => {
+  routes.forEach(routeItem => {
+    if (containsCurrentRoute(routeItem, currentPath)) {
+      if (routeItem.name) {
+        expandedRoutes.value[routeItem.name] = true
+      }
+
+      if (routeItem.children) {
+        expandActiveRoutes(routeItem.children, currentPath)
+      }
+    }
+  })
+}
+
+// Инициализация и отслеживание изменений маршрута
+onMounted(() => {
+  expandActiveRoutes(props.routes, route.path)
+})
+
+watch(() => route.path, (newPath) => {
+  expandedRoutes.value = {} // Сброс перед новым раскрытием
+  expandActiveRoutes(props.routes, newPath)
+})
+
+const toggleRoute = (routeName: string | symbol | undefined, event?: Event) => {
+  if (event) event.stopPropagation()
+  if (!routeName) return
   expandedRoutes.value[routeName] = !expandedRoutes.value[routeName]
 }
 </script>
 
 <template>
   <ul class="sidebar__list">
-    <li v-for="route in routes" :key="route.name" class="sidebar__item">
+    <li v-for="routeItem in routes" :key="routeItem.name" class="sidebar__item">
       <RouterLink
-        v-if="!route.children"
-        :to="route.path"
+        v-if="!routeItem.children"
+        :to="routeItem.path"
         class="sidebar__link"
+        :class="{ 'sidebar__link--active': normalizePath(route.path) === normalizePath(routeItem.path) }"
       >
-        {{ route.name }}
+        {{ routeItem.name }}
       </RouterLink>
       <div v-else class="sidebar__parent">
-        <div class="sidebar__header" @click="toggleRoute(route.name)">
-          <span class="sidebar__link">{{ route.name }}</span>
+        <div class="sidebar__header" @click="toggleRoute(routeItem.name, $event)">
+          <RouterLink
+            :to="routeItem.path"
+            class="sidebar__link"
+            :class="{ 'sidebar__link--active': normalizePath(route.path) === normalizePath(routeItem.path) }"
+            @click.stop
+          >
+            {{ routeItem.name }}
+          </RouterLink>
           <span class="sidebar__toggle">
-            {{ route.name && expandedRoutes[route.name] ? '▼' : '▶' }}
+            {{ routeItem.name && expandedRoutes[routeItem.name] ? '▼' : '▶' }}
           </span>
         </div>
         <transition name="slide">
-          <div v-if="route.name && expandedRoutes[route.name]" class="sidebar__children">
+          <div v-if="routeItem.name && expandedRoutes[routeItem.name]" class="sidebar__children">
             <Sidebar
-              :routes="route.children"
+              :routes="routeItem.children"
               class="sidebar__nested"
             />
           </div>
@@ -49,6 +106,7 @@ const toggleRoute = (routeName: string | symbol | undefined) => {
 </template>
 
 <style scoped>
+/* Стили остаются такими же, как в предыдущем примере */
 .sidebar__list {
   list-style: none;
   padding: 8px 0;
@@ -69,6 +127,11 @@ const toggleRoute = (routeName: string | symbol | undefined) => {
 
 .sidebar__link:hover {
   color: #42b983;
+}
+
+.sidebar__link--active {
+  color: #42b983;
+  font-weight: bold;
 }
 
 .sidebar__parent {

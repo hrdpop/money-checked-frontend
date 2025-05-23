@@ -8,14 +8,40 @@ export const routes: readonly RouteRecordRaw[] = [
     component: Home
   },
   {
+    path: '/no-setting',
+    name: 'Не настройки',
+    component: Home,
+    children: [
+      {
+        path: '/no-no-setting',
+        name: 'Не не настройки',
+        component: Home,
+        children: [
+          {
+          path: '/no-no-no-setting',
+          name: 'Не не не настройки',
+          component: Home
+          }
+        ]
+      },
+    ]
+  },
+  {
     path: '/setting',
     name: 'Настройки',
     component: Home,
     children: [
       {
-        path: '/no-setting',
-        name: 'Не настройки',
-        component: Home
+        path: '/setting-setting',
+        name: 'Настройки настройки',
+        component: Home,
+        children: [
+          {
+            path: '/setting-setting-setting',
+            name: 'Настройки настройки настройки',
+            component: Home
+          }
+        ]
       },
     ]
   }
